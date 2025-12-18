@@ -69,3 +69,15 @@ jobs:
           echo ""
           echo "⚠️  IMPORTANT: Go disable this workflow now!"
           echo "    Repository → Actions → ... → Disable workflow"
+
+      - name: Create Issue on Success
+        if: steps.launch.outputs.success == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🎉 OCI 인스턴스 생성 성공!',
+              body: `인스턴스가 생성되었습니다!\n\n시간: ${new Date().toISOString()}\n\n**지금 바로 워크플로우를 비활성화하세요!**`
+            })
