@@ -10,7 +10,7 @@ AVAILABILITY_DOMAIN="qibq:AP-CHUNCHEON-1-AD-1"
 SUBNET_ID="ocid1.subnet.oc1..xxxxx"
 IMAGE_ID="ocid1.image.oc1..xxxxx"
 INSTANCE_NAME="my-instance"
-SSH_PUBLIC_KEY="ssh-rsa AAAA... (GitHub Secrets에 등록한 값)"
+SSH_KEY_FILE="$HOME/.ssh/oci_key.pub"  # SSH 공개키 파일 경로
 
 # 이미 성공했으면 종료
 if [ -f "$SUCCESS_FLAG" ]; then
@@ -25,22 +25,26 @@ RESULT=$(oci compute instance launch \
     --shape "VM.Standard.A1.Flex" \
     --shape-config '{"ocpus": 4, "memoryInGBs": 24}' \
     --subnet-id "$SUBNET_ID" \
-    --image-id "$IMAGE_ID" \
+    --source-details "{\"sourceType\":\"image\",\"imageId\":\"$IMAGE_ID\",\"bootVolumeSizeInGBs\":100}" \
     --assign-public-ip true \
-    --boot-volume-size-in-gbs 100 \
-    --ssh-authorized-keys "$SSH_PUBLIC_KEY" \
+    --ssh-authorized-keys-file "$SSH_KEY_FILE" \
     --display-name "$INSTANCE_NAME" \
     2>&1)
 
-if echo "$RESULT" | grep -q "ocid1.instance"; then
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -eq 0 ] && echo "$RESULT" | grep -q "ocid1.instance"; then
     echo "$(date): SUCCESS!" >> "$LOG_FILE"
     echo "$RESULT" >> "$LOG_FILE"
     touch "$SUCCESS_FLAG"
-    
+
     # Discord 알림
-    curl -H "Content-Type: application/json" \
+    curl -s -H "Content-Type: application/json" \
         -d "{\"content\":\"🎉 **OCI 인스턴스 생성 성공!**\n\n$(date)\"}" \
         "$DISCORD_WEBHOOK"
 else
-    echo "$(date): Failed - Out of capacity" >> "$LOG_FILE"
+    # 에러 상세 로그 기록
+    echo "$(date): Failed (exit code: $EXIT_CODE)" >> "$LOG_FILE"
+    echo "$RESULT" >> "$LOG_FILE"
+    echo "---" >> "$LOG_FILE"
 fi

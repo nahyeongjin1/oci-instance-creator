@@ -133,9 +133,24 @@ nano ~/oci-create.sh
 | `SUBNET_ID`           | Subnet OCID                                     |
 | `IMAGE_ID`            | Image OCID                                      |
 | `INSTANCE_NAME`       | 생성할 인스턴스 이름                            |
-| `SSH_PUBLIC_KEY`      | SSH 공개키 (로컬 PC의 `~/.ssh/id_rsa.pub` 내용) |
+| `SSH_KEY_FILE`        | SSH 공개키 파일 경로 (기본값: `~/.ssh/oci_key.pub`) |
 
-### Step 5: 스크립트 테스트
+### Step 5: SSH 공개키 파일 생성
+
+로컬 PC의 SSH 공개키를 VM에 파일로 저장합니다:
+
+```bash
+# 로컬 PC에서 공개키 확인
+cat ~/.ssh/id_rsa.pub
+
+# 만약 없으면 생성
+ssh-keygen -t rsa -b 4096
+
+# VM에서 파일 생성 (위에서 복사한 내용 붙여넣기)
+echo "ssh-rsa AAAA..." > ~/.ssh/oci_key.pub
+```
+
+### Step 6: 스크립트 테스트
 
 ```bash
 # 실행
@@ -145,15 +160,17 @@ nano ~/oci-create.sh
 cat ~/oci-instance.log
 ```
 
-### Step 6: 크론잡 등록
+### Step 7: 크론잡 등록
 
 ```bash
 # 크론탭 편집
 crontab -e
 
 # 맨 아래에 추가 (1분마다 실행)
-* * * * * ~/oci-create.sh
+* * * * * PATH=$HOME/bin:$PATH ~/oci-create.sh
 ```
+
+> **참고**: cron은 사용자 shell 환경(`.bashrc`)을 로드하지 않으므로 `oci` 명령어 경로를 찾지 못할 수 있습니다. `PATH=$HOME/bin:$PATH`를 추가하면 해결됩니다.
 
 ### 모니터링
 
