@@ -25,7 +25,7 @@ RESULT=$(oci compute instance launch \
     --shape "VM.Standard.A1.Flex" \
     --shape-config '{"ocpus": 4, "memoryInGBs": 24}' \
     --subnet-id "$SUBNET_ID" \
-    --source-details "{\"sourceType\":\"image\",\"imageId\":\"$IMAGE_ID\",\"bootVolumeSizeInGBs\":100}" \
+    --source-details "{\"sourceType\":\"image\",\"imageId\":\"$IMAGE_ID\",\"bootVolumeSizeInGBs\":200}" \
     --assign-public-ip true \
     --ssh-authorized-keys-file "$SSH_KEY_FILE" \
     --display-name "$INSTANCE_NAME" \

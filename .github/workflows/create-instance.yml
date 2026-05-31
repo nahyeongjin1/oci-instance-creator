@@ -45,7 +45,7 @@ jobs:
             --subnet-id "${{ secrets.OCI_SUBNET }}" \
             --image-id "${{ secrets.OCI_IMAGE }}" \
             --assign-public-ip true \
-            --boot-volume-size-in-gbs 100 \
+            --boot-volume-size-in-gbs 200 \
             --ssh-authorized-keys-file /tmp/ssh_key.pub \
             --display-name "AIew-instance" \
             2>&1) || true
