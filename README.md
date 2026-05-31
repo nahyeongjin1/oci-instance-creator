@@ -56,7 +56,7 @@ OCI Free Tier A1 Flex는 스펙이 너무 좋아서 전 세계에서 경쟁이 �
 | Private Key         | 다운로드한 `.pem` 파일                                       |
 | Subnet OCID         | OCI 콘솔 → Networking → VCN → Subnets → OCID 복사            |
 | Image OCID          | OCI 콘솔 → Compute → Images → 원하는 이미지 OCID             |
-| Availability Domain | OCI 콘솔 → Compute → Instances → Create instance → AD 확인   |
+| Availability Domain | `oci iam availability-domain list` 또는 콘솔 → Create instance 화면. 접두사 `qibq`는 테넌시마다 다름 |
 | SSH 공개키          | 로컬 PC의 `~/.ssh/id_rsa.pub` (없으면 `ssh-keygen`으로 생성) |
 
 ---
@@ -129,7 +129,7 @@ nano ~/oci-create.sh
 | --------------------- | ----------------------------------------------- |
 | `DISCORD_WEBHOOK`     | Discord 웹훅 URL                                |
 | `COMPARTMENT_ID`      | Tenancy OCID                                    |
-| `AVAILABILITY_DOMAIN` | 가용 도메인 (예: `qibq:AP-CHUNCHEON-1-AD-1`)    |
+| `AVAILABILITY_DOMAIN` | 가용 도메인. 접두사 `qibq`는 테넌시마다 다름 → `oci iam availability-domain list`로 확인 |
 | `SUBNET_ID`           | Subnet OCID                                     |
 | `IMAGE_ID`            | Image OCID                                      |
 | `INSTANCE_NAME`       | 생성할 인스턴스 이름                            |
@@ -203,15 +203,20 @@ Repository → Settings → Secrets and variables → Actions → **New reposito
 | `OCI_KEY`         | Private key 전체 내용    | 다운로드한 `.pem` 파일 내용                       |
 | `OCI_SUBNET`      | `ocid1.subnet.oc1...`    | OCI 콘솔 → Networking → VCN → Subnets → OCID 복사 |
 | `OCI_IMAGE`       | `ocid1.image.oc1...`     | OCI 콘솔 → Compute → Images → 원하는 이미지 OCID  |
+| `OCI_AD`          | `qibq:AP-CHUNCHEON-1-AD-1` | `oci iam availability-domain list` 결과. **접두사(`qibq`)는 테넌시마다 다름** |
+| `OCI_REGION`      | `ap-chuncheon-1`         | 본인 홈 리전 식별자 (OCI 콘솔 우측 상단 리전)     |
 | `SSH_PUBLIC_KEY`  | `ssh-rsa AAAA...`        | `~/.ssh/id_rsa.pub` 내용                          |
 
-### 워크플로우 설정
+> ⚠️ **fork 사용자 주의**: `OCI_AD`의 접두사(`qibq`)와 `OCI_REGION`은 **테넌시·리전마다 다릅니다.** 원본 값(춘천) 그대로 두면 실패하니 반드시 본인 값으로 채우세요.
 
-`.github/workflows/create-instance.yml`에서 필요시 수정:
+### 워크플로우 설정 (선택)
 
-- `availability-domain`: 본인 리전의 AD
-- `shape-config`: OCPU/메모리 설정
-- `cron`: 실행 주기
+가용 도메인·리전은 위 Secret(`OCI_AD`, `OCI_REGION`)으로 주입되므로 yml을 직접 수정할 필요가 없습니다.
+아래 값만 바꾸고 싶다면 `.github/workflows/create-instance.yml`에서 수정:
+
+- `shape-config`: OCPU/메모리 설정 (기본 `4 OCPU / 24GB` = Free Tier 최대)
+- `boot-volume-size-in-gbs`: 부트 볼륨 크기 (기본 `200` = Free Tier 최대)
+- `cron`: 실행 주기 (기본 5분)
 
 ## 사용법
 

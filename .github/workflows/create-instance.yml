@@ -22,7 +22,7 @@ jobs:
           user=${{ secrets.OCI_USER }}
           fingerprint=${{ secrets.OCI_FINGERPRINT }}
           tenancy=${{ secrets.OCI_TENANCY }}
-          region=ap-chuncheon-1
+          region=${{ secrets.OCI_REGION }}
           key_file=~/.oci/key.pem
           EOF
 
@@ -39,7 +39,7 @@ jobs:
 
           RESULT=$(oci compute instance launch \
             --compartment-id "${{ secrets.OCI_TENANCY }}" \
-            --availability-domain "qibq:AP-CHUNCHEON-1-AD-1" \
+            --availability-domain "${{ secrets.OCI_AD }}" \
             --shape "VM.Standard.A1.Flex" \
             --shape-config '{"ocpus": 4, "memoryInGBs": 24}' \
             --subnet-id "${{ secrets.OCI_SUBNET }}" \
